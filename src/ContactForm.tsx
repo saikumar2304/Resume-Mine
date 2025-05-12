@@ -13,22 +13,33 @@ const ContactForm: React.FC = () => {
     e.preventDefault();
     setStatus("Sending...");
 
-    emailjs
-      .send(
-        "your_service_id", // ✅ Replace with your EmailJS Service ID
-        "your_template_id", // ✅ Replace with your EmailJS Template ID
+    emailjs.send(
+      "your_service_id", // Email to you
+      "your_template_id", // Your template ID
+      {
+        from_name: formData.name,
+        from_email: formData.email,
+        message: formData.message,
+      },
+      "your_public_key"
+    )
+    .then(() => {
+      // Send confirmation to user
+      return emailjs.send(
+        "your_service_id", // same or another service ID
+        "user_thanks_template", // new template for sender
         {
-          from_name: formData.name,
-          from_email: formData.email,
-          message: formData.message,
+          to_name: formData.name,
+          to_email: formData.email, // make sure your user template uses {{to_email}} in To field
         },
-        "your_public_key" // ✅ Replace with your EmailJS Public Key
-      )
-      .then(() => {
-        setStatus("Message sent successfully!");
-        setFormData({ name: "", email: "", message: "" });
-      })
-      .catch(() => setStatus("Failed to send message. Try again later."));
+        "your_public_key"
+      );
+    })
+    .then(() => {
+      setStatus("Message sent successfully!");
+      setFormData({ name: "", email: "", message: "" });
+    })
+    .catch(() => setStatus("Failed to send message. Try again later."));
   };
 
   return (

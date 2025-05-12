@@ -56,8 +56,8 @@ const handleSubmit = (e: React.FormEvent) => {
       "service_uajnzv6",
       "template_go98314", // ✅ Auto-Reply Template ID
       {
-        user_name: formData.name,
-        user_email: formData.email, // ✅ Ensures the user gets the email
+        to_name: formData.name,
+        to_email: formData.email,
       },
       "fYnLpUSg3a5bPuccA"
     );
@@ -280,7 +280,9 @@ useEffect(() => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405M15 17l-3-3m3 3l3 3m-6-6V5a1 1 0 00-2 0v6m0 0L9 8m3 3l3-3" />
                 </svg>
-                <span className="text-indigo-400 font-medium">{pageViews}</span> Total Page Views
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-yellow-400 to-blue-500 animate-gradient font-semibold">
+                  {pageViews} Total Page Views
+                </span>
               </div>
             </div>
             <div className="hidden md:block md:w-2/5">
@@ -498,32 +500,7 @@ useEffect(() => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="bg-slate-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="bg-indigo-600 p-4">
-                <GraduationCap size={28} className="text-white" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-2">Master of Computer Science</h3>
-                <p className="text-indigo-400 font-medium mb-2">Stanford University</p>
-                <p className="text-slate-400 mb-4">2014 - 2016</p>
-                <ul className="text-slate-400 space-y-2">
-                  <li className="flex items-start">
-                    <span className="text-indigo-400 mr-2">•</span>
-                    Specialized in Artificial Intelligence and Machine Learning
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-indigo-400 mr-2">•</span>
-                    Graduated with honors (GPA: 3.9/4.0)
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-indigo-400 mr-2">•</span>
-                    Research assistant in the Computer Vision Lab
-                  </li>
-                </ul>
-              </div>
-            </div>
-            
+          <div className="flex justify-center">
             <div className="bg-slate-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
               <div className="bg-indigo-600 p-4">
                 <GraduationCap size={28} className="text-white" />
@@ -798,3 +775,25 @@ useEffect(() => {
   );
 }
 export default App
+
+// Disco-style animated gradient for page views badge
+// You can move this to your CSS file if preferred
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-x 4s ease infinite;
+}
+`;
+if (typeof document !== "undefined" && !document.getElementById('disco-gradient-style')) {
+  style.id = 'disco-gradient-style';
+  document.head.appendChild(style);
+}
