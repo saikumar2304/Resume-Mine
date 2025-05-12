@@ -7,6 +7,7 @@ import CustomCursor from "./CustomCursor";
 import { CheckCircle } from "lucide-react";
 import emailjs from "emailjs-com";
 import { supabase } from "./supabaseClient";
+import ReactionBar from "./ReactionBar";
 
 
 function App() {
@@ -771,6 +772,7 @@ useEffect(() => {
           </div>
         </div>
       </footer>
+      <ReactionBar />
     </div>
   );
 }
