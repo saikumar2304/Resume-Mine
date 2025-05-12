@@ -10,12 +10,42 @@ import { supabase } from "./supabaseClient";
 import ReactionBar from "./ReactionBar";
 
 
+
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);  
+  const [stormMode, setStormMode] = useState(false);
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "d") {
+        setStormMode((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Thunder sound effect and shake when stormMode is activated
+  useEffect(() => {
+    if (stormMode) {
+      const audio = new Audio("/thunder.mp3");
+      audio.volume = 0.5;
+      audio.play();
+      document.body.classList.add("shake");
+      setTimeout(() => document.body.classList.remove("shake"), 500);
+    }
+  }, [stormMode]);
+
+  // Auto-disable stormMode after 15 seconds
+  useEffect(() => {
+    if (stormMode) {
+      const timer = setTimeout(() => setStormMode(false), 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [stormMode]);
 
   const [downloadCount, setDownloadCount] = useState(0);
 
@@ -140,7 +170,8 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen dark bg-slate-900 text-white">
+    
+    <div className={`min-h-screen dark bg-slate-900 text-white ${stormMode ? "storm-active" : ""}`}>
       <CustomCursor />
       {/* Navigation */}
       <nav className="fixed w-full bg-slate-800 shadow-sm z-50">
@@ -314,11 +345,11 @@ useEffect(() => {
       </p>
     </div>
 
-    {/* About Me Grid */}
+      {/* About Me Grid */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
       
       {/* Personal Details */}
-      <div className="bg-slate-800 rounded-lg p-8 shadow-lg border-l-4 border-indigo-600">
+      <div className={`bg-slate-800 rounded-lg p-8 shadow-lg border-l-4 border-indigo-600${stormMode ? " storm-pulse" : ""}`}>
         <div className="flex items-center mb-4">
           <User size={28} className="text-indigo-600 mr-3" />
           <h3 className="text-2xl font-semibold text-white">Personal Info</h3>
@@ -332,7 +363,7 @@ useEffect(() => {
       </div>
 
       {/* Skills Section */}
-      <div className="bg-slate-800 rounded-lg p-8 shadow-lg border-l-4 border-indigo-600">
+      <div className={`bg-slate-800 rounded-lg p-8 shadow-lg border-l-4 border-indigo-600${stormMode ? " storm-pulse" : ""}`}>
         <div className="flex items-center mb-4">
           <Code size={28} className="text-indigo-600 mr-3" />
           <h3 className="text-2xl font-semibold text-white">Technical Skills</h3>
@@ -351,17 +382,17 @@ useEffect(() => {
 
     {/* Fun Facts & Achievements */}
     <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div className="bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
+      <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center${stormMode ? " storm-pulse" : ""}`}>
         <Award size={40} className="text-indigo-600 mx-auto mb-3" />
         <h3 className="text-2xl font-semibold text-white">3+ Years</h3>
         <p className="text-slate-400 text-sm">Coding Experience</p>
       </div>
-      <div className="bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
+      <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center${stormMode ? " storm-pulse" : ""}`}>
         <Github size={40} className="text-indigo-600 mx-auto mb-3" />
         <h3 className="text-2xl font-semibold text-white">{commitCount}+ Commits</h3>
         <p className="text-slate-400 text-sm">Open-source contributions</p>
       </div>
-      <div className="bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
+      <div className={`bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center${stormMode ? " storm-pulse" : ""}`}>
         <Briefcase size={40} className="text-indigo-600 mx-auto mb-3" />
         <h3 className="text-2xl font-semibold text-white">10+ Projects</h3>
         <p className="text-slate-400 text-sm">Developed for businesses</p>
@@ -397,7 +428,7 @@ useEffect(() => {
             <div className="relative border-l-2 border-indigo-200 pl-8 ml-4 md:ml-6">
               <div className="mb-12">
                 <div className="absolute -left-3 mt-1.5 h-6 w-6 rounded-full border-4 border-white bg-indigo-600"></div>
-                <div className="bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className={`bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300${stormMode ? " storm-pulse" : ""}`}>
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
                       <h3 className="text-xl font-bold text-white">System Engineer</h3>
@@ -428,7 +459,7 @@ useEffect(() => {
               
               <div className="mb-12">
                 <div className="absolute -left-3 mt-1.5 h-6 w-6 rounded-full border-4 border-white bg-indigo-600"></div>
-                <div className="bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className={`bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300${stormMode ? " storm-pulse" : ""}`}>
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
                       <h3 className="text-xl font-bold text-white">Software Developer</h3>
@@ -458,7 +489,7 @@ useEffect(() => {
               
               <div>
                 <div className="absolute -left-3 mt-1.5 h-6 w-6 rounded-full border-4 border-white bg-indigo-600"></div>
-                <div className="bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className={`bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300${stormMode ? " storm-pulse" : ""}`}>
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
                       <h3 className="text-xl font-bold text-white">Freelance Web Developer</h3>
@@ -502,7 +533,7 @@ useEffect(() => {
           </div>
           
           <div className="flex justify-center">
-            <div className="bg-slate-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div className={`bg-slate-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300${stormMode ? " storm-pulse" : ""}`}>
               <div className="bg-indigo-600 p-4">
                 <GraduationCap size={28} className="text-white" />
               </div>
@@ -552,14 +583,14 @@ useEffect(() => {
 
     {/* GitHub Stats & Streaks */}
     <div className="flex flex-col md:flex-row justify-center items-center gap-12">
-      <div>
+      <div className={stormMode ? "storm-pulse" : ""}>
         <h3 className="text-2xl font-semibold text-white mb-4">GitHub Stats</h3>
         <img 
           src="https://github-readme-stats.vercel.app/api?username=saikumar2304&show_icons=true&theme=dark"
           alt="GitHub Stats"
         />
       </div>
-      <div>
+      <div className={stormMode ? "storm-pulse" : ""}>
         <h3 className="text-2xl font-semibold text-white mb-4">GitHub Streak</h3>
         <img 
           src="https://github-readme-streak-stats.herokuapp.com/?user=saikumar2304&theme=dark"
@@ -569,7 +600,7 @@ useEffect(() => {
     </div>
 
     {/* Most Used Languages - Centered */}
-    <div className="mt-12 flex flex-col items-center">
+    <div className={`mt-12 flex flex-col items-center${stormMode ? " storm-pulse" : ""}`}>
       <h3 className="text-2xl font-semibold text-white mb-4">Most Used Languages</h3>
       <img 
         src="https://github-readme-stats.vercel.app/api/top-langs/?username=saikumar2304&layout=compact&theme=dark"
@@ -578,7 +609,7 @@ useEffect(() => {
     </div>
 
     {/* GitHub Badges */}
-    <div className="mt-12 flex flex-wrap justify-center gap-4">
+    <div className={`mt-12 flex flex-wrap justify-center gap-4${stormMode ? " storm-pulse" : ""}`}>
       <img src="https://img.shields.io/github/followers/saikumar2304?label=Followers&style=social" alt="GitHub Followers" />
       <img src="https://img.shields.io/github/stars/saikumar2304?label=GitHub%20Stars&style=social" alt="GitHub Stars" />
       <img src="https://img.shields.io/github/contributors/saikumar2304/portfolio?label=Contributors" alt="Contributors" />
@@ -605,15 +636,15 @@ useEffect(() => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
       
       {/* Contact Information */}
-      <div className="bg-slate-800 p-8 rounded-lg shadow-lg border-l-4 border-indigo-600">
+      <div className={`bg-slate-800 p-8 rounded-lg shadow-lg border-l-4 border-indigo-600${stormMode ? " storm-pulse" : ""}`}>
         <h3 className="text-2xl font-semibold text-white mb-6 flex items-center">
           <Mail size={28} className="text-indigo-600 mr-3" /> Contact Info
         </h3>
         
-        {/* Contact Items */}
-        <div className="space-y-6">
-          {/* Email */}
-          <div className="flex items-center bg-slate-700 p-4 rounded-lg shadow-sm">
+          {/* Contact Items */}
+          <div className="space-y-6">
+            {/* Email */}
+            <div className={`flex items-center bg-slate-700 p-4 rounded-lg shadow-sm${stormMode ? " storm-pulse" : ""}`}>
             <Mail size={20} className="text-indigo-600" />
             <div className="ml-4">
               <p className="text-sm text-slate-400">Email</p>
@@ -623,8 +654,8 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Phone */}
-          <div className="flex items-center bg-slate-700 p-4 rounded-lg shadow-sm">
+            {/* Phone */}
+            <div className={`flex items-center bg-slate-700 p-4 rounded-lg shadow-sm${stormMode ? " storm-pulse" : ""}`}>
             <Phone size={20} className="text-indigo-600" />
             <div className="ml-4">
               <p className="text-sm text-slate-400">Phone</p>
@@ -634,8 +665,8 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Location */}
-          <div className="flex items-center bg-slate-700 p-4 rounded-lg shadow-sm">
+            {/* Location */}
+            <div className={`flex items-center bg-slate-700 p-4 rounded-lg shadow-sm${stormMode ? " storm-pulse" : ""}`}>
             <Briefcase size={20} className="text-indigo-600" />
             <div className="ml-4">
               <p className="text-sm text-slate-400">Location</p>
@@ -648,13 +679,13 @@ useEffect(() => {
         <div className="mt-8">
           <h4 className="text-lg font-semibold text-white mb-4">Connect on Social Media</h4>
           <div className="flex space-x-4">
-            <a href="https://github.com/saikumar2304" className="bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
+            <a href="https://github.com/saikumar2304" className={`bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md${stormMode ? " storm-pulse" : ""}`}>
               <Github size={22} />
             </a>
-            <a href="https://linkedin.com/in/saikumar2304" className="bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
+            <a href="https://linkedin.com/in/saikumar2304" className={`bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md${stormMode ? " storm-pulse" : ""}`}>
               <Linkedin size={22} />
             </a>
-            <a href="#" className="bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
+            <a href="#" className={`bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md${stormMode ? " storm-pulse" : ""}`}>
               <ExternalLink size={22} />
             </a>
           </div>
@@ -662,7 +693,7 @@ useEffect(() => {
       </div>
 
       {/* Contact Form */}
-      <div className="bg-slate-800 p-8 rounded-lg shadow-lg border-l-4 border-indigo-600">
+      <div className={`bg-slate-800 p-8 rounded-lg shadow-lg border-l-4 border-indigo-600${stormMode ? " storm-pulse" : ""}`}>
         <h3 className="text-2xl font-semibold text-white mb-6 flex items-center">
           <Mail size={28} className="text-indigo-600 mr-3" /> Send Me a Message
         </h3>
@@ -742,6 +773,8 @@ useEffect(() => {
       <CodingStats />
     </div>
 </section>
+
+
       
 
       {/* Footer */}
@@ -773,6 +806,12 @@ useEffect(() => {
         </div>
       </footer>
       <ReactionBar />
+      <button
+  onClick={() => setStormMode(prev => !prev)}
+  className="fixed bottom-4 right-4 bg-yellow-400 text-black px-3 py-2 rounded-full shadow-lg z-50"
+>
+  ⚡
+</button>
     </div>
   );
 }
@@ -798,4 +837,46 @@ style.innerHTML = `
 if (typeof document !== "undefined" && !document.getElementById('disco-gradient-style')) {
   style.id = 'disco-gradient-style';
   document.head.appendChild(style);
+}
+
+// Enhanced Storm Mode Visual & Audio Effects
+const styleStorm = document.createElement("style");
+styleStorm.innerHTML = `
+@keyframes stormFlash {
+  0%, 100% { background-color: transparent; }
+  15% { background-color: rgba(255, 255, 255, 0.2); }
+  30% { background-color: rgba(255, 255, 0, 0.6); }
+  50% { background-color: rgba(255, 255, 255, 0.1); }
+  75% { background-color: rgba(255, 255, 0, 0.4); }
+}
+.storm-active {
+  animation: stormFlash 0.3s infinite;
+}
+
+@keyframes stormGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px 4px rgba(252, 211, 77, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px 8px rgba(252, 211, 77, 0.8);
+  }
+}
+.storm-pulse {
+  animation: stormGlow 1s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+`;
+if (typeof document !== "undefined" && !document.getElementById("storm-style-enhanced")) {
+  styleStorm.id = "storm-style-enhanced";
+  document.head.appendChild(styleStorm);
 }
