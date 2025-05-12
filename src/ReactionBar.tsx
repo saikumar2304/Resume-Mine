@@ -36,7 +36,7 @@ const ReactionBar: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed right-2 top-1/2 -translate-y-1/2 z-50 bg-slate-800 p-3 rounded-lg shadow-lg space-y-3">
+    <div className="fixed right-2 top-1/2 -translate-y-1/2 z-50 bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20 shadow-lg space-y-3">
       {reactionsList.map(({ type, emoji }) => (
         <button
           key={type}

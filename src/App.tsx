@@ -533,7 +533,7 @@ useEffect(() => {
           </div>
           
           <div className="flex justify-center">
-            <div className={`bg-slate-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300${stormMode ? " storm-pulse" : ""}`}>
+            <div className={`bg-slate-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-indigo-600${stormMode ? " storm-pulse" : ""}`}>
               <div className="bg-indigo-600 p-4">
                 <GraduationCap size={28} className="text-white" />
               </div>
@@ -557,6 +557,67 @@ useEffect(() => {
                 </ul>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Projects Section */}
+      <section id="projects" className="py-16 md:py-24 bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-extrabold mb-4">Featured Projects</h2>
+            <div className="h-1 w-24 bg-indigo-600 mx-auto mb-6"></div>
+            <p className="text-lg text-slate-300">
+              Explore some of the impactful applications and tools I’ve created.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {[
+              
+              {
+                title: "Discord Game Bot (Clash of Cards)",
+                description: "Where 10 players can play together with lot of cards and buffs",
+                tech: ["JavaScript", "Discord.js"],
+                github: "https://github.com/saikumar2304/Clash-of_Cards"
+              },
+              {
+                title: "Resume Webpage",
+                description: "Customizable resume with real-time tracking.",
+                tech: ["React", "Vite", "Supabase", "EmailJS"],
+                github: "https://github.com/saikumar2304/Resume-Mine",
+                live: "https://www.saikumar.fun"
+              },
+              {
+                title: "Food & Rides Admin Panel",
+                description: "Multi-service app supporting food delivery, auto, and ride bookings with Mongo backend.",
+                tech: ["ReactJs", "ExpressJS", "MongoDB"],
+                github: "https://github.com/saikumar2304/Admin-Panel-for-Vehicle-Management",
+                live : "https://demo-git-main-saikumar2304s-projects.vercel.app/"
+              },
+              {
+                title: "Java Full Course",
+                description: "Full course with quizes and assignments to solve",
+                tech: ["ReactJs", "ExpressJS", "PostgresSQL", "Supabase"],
+                github: "https://github.com/saikumar2304/Java-with-assignments",
+                live : "https://www.javatute.in/home"
+              }
+
+            ].map((proj, index) => (
+              <div key={index} className={`bg-slate-800 p-6 rounded-xl shadow-xl border-t-4 border-indigo-600 transition-transform transform hover:-translate-y-1 hover:shadow-2xl${stormMode ? ' storm-pulse' : ''}`}>
+                <h3 className="text-2xl font-semibold mb-2">{proj.title}</h3>
+                <p className="text-slate-400 mb-4">{proj.description}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {proj.tech.map((tech, i) => (
+                    <span key={i} className="bg-indigo-900 text-indigo-100 px-3 py-1 rounded-full text-xs">{tech}</span>
+                  ))}
+                </div>
+                <div className="flex gap-4">
+                  <a href={proj.github} target="_blank" className="text-indigo-400 hover:text-white transition">GitHub</a>
+                  {proj.live && <a href={proj.live} target="_blank" className="text-green-400 hover:text-white transition">Live</a>}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
