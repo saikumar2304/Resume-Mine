@@ -601,6 +601,13 @@ useEffect(() => {
                 tech: ["ReactJs", "ExpressJS", "PostgresSQL", "Supabase"],
                 github: "https://github.com/saikumar2304/Java-with-assignments",
                 live : "https://www.javatute.in/home"
+              },
+              {
+                title: "MemeSlammer",
+                description: "Static Webpage made for discord bot",
+                tech: ["JavaScript", "HTML","CSS"],
+                github: "https://github.com/saikumar2304/memeslammer",
+                live : "https://memeslammer.vercel.app"
               }
 
             ].map((proj, index) => (
