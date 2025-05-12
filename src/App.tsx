@@ -6,6 +6,7 @@ import CustomCursor from "./CustomCursor";
 // import ContactForm from "./ContactForm";
 import { CheckCircle } from "lucide-react";
 import emailjs from "emailjs-com";
+import { supabase } from "./supabaseClient";
 
 
 function App() {
@@ -17,10 +18,12 @@ function App() {
 
   const [downloadCount, setDownloadCount] = useState(0);
 
+  // Page Views Counter State
+  const [pageViews, setPageViews] = useState(0);
 
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
-const [status, setStatus] = useState("");
-const [showSuccess, setShowSuccess] = useState(false);
+  const [status, setStatus] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
 const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
   setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -67,10 +70,16 @@ useEffect(() => {
   setDownloadCount(savedCount ? parseInt(savedCount) : 0);
 }, []);
 
-const handleDownload = () => {
+const handleDownload = async () => {
   const newCount = downloadCount + 1;
   setDownloadCount(newCount);
   localStorage.setItem("resumeDownloads", newCount);
+
+  try {
+    const { error } = await supabase.from("resume_downloads").insert({});
+  } catch (error) {
+    console.error("Error logging resume download:", error);
+  }
 };
 
   const [commitCount, setCommitCount] = useState(0);
@@ -93,6 +102,23 @@ useEffect(() => {
 
   fetchGitHubCommits();
 }, []);
+
+useEffect(() => {
+  const fetchPageViews = async () => {
+    const { count, error } = await supabase
+      .from("page_visits")
+      .select("*", { count: "exact", head: true });
+    if (!error) setPageViews(count || 0);
+  };
+  const logVisit = async () => {
+    const { error } = await supabase.from("page_visits").insert({});
+    if (error) console.error("Error logging page visit:", error);
+  };
+  logVisit();
+  fetchPageViews();
+  const interval = setInterval(fetchPageViews, 10000);
+  return () => clearInterval(interval);
+}, []);
   
   useEffect(() => {
     if (darkMode) {
@@ -113,10 +139,10 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
+    <div className="min-h-screen dark bg-slate-900 text-white">
       <CustomCursor />
       {/* Navigation */}
-      <nav className="fixed w-full bg-white shadow-sm z-50">
+      <nav className="fixed w-full bg-slate-800 shadow-sm z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex-shrink-0 font-bold text-xl text-indigo-600">
@@ -126,20 +152,19 @@ useEffect(() => {
             {/* Desktop Navigation */}
             <div className="hidden md:block">
               <div className="ml-10 flex items-center space-x-8">
-                <a href="#home" className="text-slate-700 hover:text-indigo-600 transition-colors duration-300">Home</a>
-                <a href="#about" className="text-slate-700 hover:text-indigo-600 transition-colors duration-300">About</a>
-                <a href="#experience" className="text-slate-700 hover:text-indigo-600 transition-colors duration-300">Experience</a>
-                <a href="#education" className="text-slate-700 hover:text-indigo-600 transition-colors duration-300">Education</a>
-                <a href="#contact" className="text-slate-700 hover:text-indigo-600 transition-colors duration-300">Contact</a>
-                
-                                    <a 
-                      onClick={handleDownload} 
-                      href="/resume.pdf" 
-                      download 
-                      className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition flex items-center"
-                    >
-                      <Download size={16} className="mr-2" /> Resume ({downloadCount})
-                    </a>
+                <a href="#home" className="text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">Home</a>
+                <a href="#about" className="text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">About</a>
+                <a href="#experience" className="text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">Experience</a>
+                <a href="#education" className="text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">Education</a>
+                <a href="#contact" className="text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">Contact</a>
+                <a 
+                  onClick={handleDownload} 
+                  href="/resume.pdf" 
+                  download 
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition flex items-center"
+                >
+                  <Download size={16} className="mr-2" /> Resume ({downloadCount})
+                </a>
                 {/* 🌙 Dark Mode Toggle
                 <button
                   onClick={toggleDarkMode}
@@ -154,7 +179,7 @@ useEffect(() => {
             <div className="md:hidden">
               <button 
                 onClick={toggleMenu}
-                className="inline-flex items-center justify-center p-2 rounded-md text-slate-700 hover:text-indigo-600 focus:outline-none"
+                className="inline-flex items-center justify-center p-2 rounded-md text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 focus:outline-none"
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -164,39 +189,39 @@ useEffect(() => {
         
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white shadow-lg">
+          <div className="md:hidden bg-slate-800 shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <a 
                 href="#home" 
-                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-indigo-600 hover:bg-slate-50"
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 hover:bg-slate-900"
                 onClick={toggleMenu}
               >
                 Home
               </a>
               <a 
                 href="#about" 
-                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-indigo-600 hover:bg-slate-50"
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 hover:bg-slate-900"
                 onClick={toggleMenu}
               >
                 About
               </a>
               <a 
                 href="#experience" 
-                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-indigo-600 hover:bg-slate-50"
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 hover:bg-slate-900"
                 onClick={toggleMenu}
               >
                 Experience
               </a>
               <a 
                 href="#education" 
-                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-indigo-600 hover:bg-slate-50"
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 hover:bg-slate-900"
                 onClick={toggleMenu}
               >
                 Education
               </a>
               <a 
                 href="#contact" 
-                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-indigo-600 hover:bg-slate-50"
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-indigo-400 dark:hover:text-indigo-400 hover:bg-slate-900"
                 onClick={toggleMenu}
               >
                 Contact
@@ -218,11 +243,11 @@ useEffect(() => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="md:w-1/2 mb-10 md:mb-0">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-slate-900">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white">
                 <span className="text-indigo-600">Sai</span> Kumar
               </h1>
-              <h2 className="text-xl md:text-2xl font-medium text-slate-600 mb-6">Software Developer</h2>
-              <p className="text-slate-600 mb-8 max-w-lg leading-relaxed">
+              <h2 className="text-xl md:text-2xl font-medium text-slate-400 mb-6">Software Developer</h2>
+              <p className="text-slate-400 mb-8 max-w-lg leading-relaxed">
                 I build exceptional digital experiences with a focus on performance, accessibility, and user satisfaction. Let's create something amazing together.
               </p>
               <div className="flex flex-wrap gap-4">
@@ -234,24 +259,31 @@ useEffect(() => {
                 </a>
                 <a 
                   href="#experience" 
-                  className="border border-slate-300 text-slate-700 px-6 py-3 rounded-md hover:border-indigo-600 hover:text-indigo-600 transition-colors duration-300"
+                  className="border border-slate-600 text-slate-300 px-6 py-3 rounded-md hover:border-indigo-600 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300"
                 >
                   View My Work
                 </a>
               </div>
               <div className="flex mt-8 space-x-4">
-                <a href="https://github.com/saikumar2304" className="text-slate-600 hover:text-indigo-600 transition-colors duration-300">
+                <a href="https://github.com/saikumar2304" className="text-slate-400 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">
                   <Github size={22} />
                 </a>
-                <a href="www.linkedin.com/in/saikumar2304" className="text-slate-600 hover:text-indigo-600 transition-colors duration-300">
+                <a href="www.linkedin.com/in/saikumar2304" className="text-slate-400 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">
                   <Linkedin size={22} />
                 </a>
-                <a href="mailto:saikumar2304@gmail.com" className="text-slate-600 hover:text-indigo-600 transition-colors duration-300">
+                <a href="mailto:saikumar2304@gmail.com" className="text-slate-400 hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">
                   <Mail size={22} />
                 </a>
               </div>
+              {/* Page Views Badge */}
+              <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-slate-800 border border-slate-700 rounded-full shadow-md text-sm text-slate-300">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405M15 17l-3-3m3 3l3 3m-6-6V5a1 1 0 00-2 0v6m0 0L9 8m3 3l3-3" />
+                </svg>
+                <span className="text-indigo-400 font-medium">{pageViews}</span> Total Page Views
+              </div>
             </div>
-            <div className="md:w-2/5">
+            <div className="hidden md:block md:w-2/5">
               <div className="relative">
                 <div className="absolute inset-0 bg-indigo-600 rounded-lg transform rotate-6"></div>
                 <img 
@@ -266,14 +298,14 @@ useEffect(() => {
       </section>
 
       {/* About Me Section */}
-<section id="about" className="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-gray-100">
+<section id="about" className="py-16 md:py-24 bg-gradient-to-b from-slate-900 to-slate-800">
   <div className="container mx-auto px-4 sm:px-6 lg:px-8">
     
     {/* Section Heading */}
     <div className="max-w-3xl mx-auto text-center mb-16">
-      <h2 className="text-4xl font-extrabold text-slate-900 mb-4">About Me</h2>
+      <h2 className="text-4xl font-extrabold text-white mb-4">About Me</h2>
       <div className="h-1 w-24 bg-indigo-600 mx-auto mb-6"></div>
-      <p className="text-lg text-slate-700 leading-relaxed">
+      <p className="text-lg text-slate-300 leading-relaxed">
         A passionate **Full Stack Developer** with a love for building scalable and user-friendly applications.  
         I specialize in **React, Node.js, and cloud-based architectures** and enjoy crafting high-performance experiences. 🚀
       </p>
@@ -283,28 +315,28 @@ useEffect(() => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
       
       {/* Personal Details */}
-      <div className="bg-white rounded-lg p-8 shadow-lg border-l-4 border-indigo-600">
+      <div className="bg-slate-800 rounded-lg p-8 shadow-lg border-l-4 border-indigo-600">
         <div className="flex items-center mb-4">
           <User size={28} className="text-indigo-600 mr-3" />
-          <h3 className="text-2xl font-semibold text-slate-900">Personal Info</h3>
+          <h3 className="text-2xl font-semibold text-white">Personal Info</h3>
         </div>
-        <ul className="text-slate-700 space-y-3">
+        <ul className="text-slate-300 space-y-3">
           <li><strong>Name:</strong> Sai Kumar</li>
           <li><strong>Location:</strong> Hyderabad, India</li>
-          <li><strong>Email:</strong> <a href="mailto:saikumar2304@gamil.com" className="text-indigo-600">saikumar2304@gmail.com</a></li>
+          <li><strong>Email:</strong> <a href="mailto:saikumar2304@gamil.com" className="text-indigo-400">saikumar2304@gmail.com</a></li>
           <li><strong>Languages:</strong> English, Telugu</li>
         </ul>
       </div>
 
       {/* Skills Section */}
-      <div className="bg-white rounded-lg p-8 shadow-lg border-l-4 border-indigo-600">
+      <div className="bg-slate-800 rounded-lg p-8 shadow-lg border-l-4 border-indigo-600">
         <div className="flex items-center mb-4">
           <Code size={28} className="text-indigo-600 mr-3" />
-          <h3 className="text-2xl font-semibold text-slate-900">Technical Skills</h3>
+          <h3 className="text-2xl font-semibold text-white">Technical Skills</h3>
         </div>
         <div className="flex flex-wrap gap-3">
           {["JavaScript", "TypeScript", "React", "Node.js", "MongoDB", "AWS", "Express.js", "Tailwind CSS"].map(skill => (
-            <span key={skill} className="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full text-sm font-medium shadow-sm">
+            <span key={skill} className="bg-indigo-900 text-indigo-200 px-4 py-2 rounded-full text-sm font-medium shadow-sm">
               {skill}
             </span>
           ))}
@@ -316,29 +348,29 @@ useEffect(() => {
 
     {/* Fun Facts & Achievements */}
     <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div className="bg-white p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
+      <div className="bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
         <Award size={40} className="text-indigo-600 mx-auto mb-3" />
-        <h3 className="text-2xl font-semibold text-slate-900">3+ Years</h3>
-        <p className="text-slate-600 text-sm">Coding Experience</p>
+        <h3 className="text-2xl font-semibold text-white">3+ Years</h3>
+        <p className="text-slate-400 text-sm">Coding Experience</p>
       </div>
-      <div className="bg-white p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
+      <div className="bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
         <Github size={40} className="text-indigo-600 mx-auto mb-3" />
-        <h3 className="text-2xl font-semibold text-slate-900">{commitCount}+ Commits</h3>
-        <p className="text-slate-600 text-sm">Open-source contributions</p>
+        <h3 className="text-2xl font-semibold text-white">{commitCount}+ Commits</h3>
+        <p className="text-slate-400 text-sm">Open-source contributions</p>
       </div>
-      <div className="bg-white p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
+      <div className="bg-slate-800 p-6 rounded-lg shadow-lg border-t-4 border-indigo-600 text-center">
         <Briefcase size={40} className="text-indigo-600 mx-auto mb-3" />
-        <h3 className="text-2xl font-semibold text-slate-900">10+ Projects</h3>
-        <p className="text-slate-600 text-sm">Developed for businesses</p>
+        <h3 className="text-2xl font-semibold text-white">10+ Projects</h3>
+        <p className="text-slate-400 text-sm">Developed for businesses</p>
       </div>
     </div>
 
     {/* Interests & Hobbies */}
     <div className="mt-16">
-      <h3 className="text-2xl font-semibold text-slate-900 text-center mb-6">Interests & Hobbies</h3>
+      <h3 className="text-2xl font-semibold text-white text-center mb-6">Interests & Hobbies</h3>
       <div className="flex flex-wrap justify-center gap-4">
         {["Open Source", "Machine Learning", "UI/UX Design", "Blockchain", "Photography"].map(interest => (
-          <span key={interest} className="bg-gray-200 text-slate-800 px-4 py-2 rounded-full text-sm font-medium shadow-sm">
+          <span key={interest} className="bg-slate-700 text-white px-4 py-2 rounded-full text-sm font-medium shadow-sm">
             {interest}
           </span>
         ))}
@@ -348,12 +380,12 @@ useEffect(() => {
   </div>
 </section>
       {/* Experience Section */}
-      <section id="experience" className="py-16 md:py-24 bg-slate-50">
+      <section id="experience" className="py-16 md:py-24 bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Work Experience</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Work Experience</h2>
             <div className="h-1 w-20 bg-indigo-600 mx-auto mb-6"></div>
-            <p className="text-slate-600 leading-relaxed">
+            <p className="text-slate-400 leading-relaxed">
               My professional journey and the companies I've had the privilege to work with.
             </p>
           </div>
@@ -362,91 +394,91 @@ useEffect(() => {
             <div className="relative border-l-2 border-indigo-200 pl-8 ml-4 md:ml-6">
               <div className="mb-12">
                 <div className="absolute -left-3 mt-1.5 h-6 w-6 rounded-full border-4 border-white bg-indigo-600"></div>
-                <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900">System Engineer</h3>
-                      <p className="text-indigo-600 font-medium">Infosys Private Limited.</p>
+                      <h3 className="text-xl font-bold text-white">System Engineer</h3>
+                      <p className="text-indigo-400 font-medium">Infosys Private Limited.</p>
                     </div>
                     <div className="mt-2 md:mt-0">
-                      <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
+                      <span className="bg-indigo-900 text-indigo-200 text-sm font-medium px-3 py-1 rounded-full">
                         Dec 2024 - Present
                       </span>
                     </div>
                   </div>
-                  <p className="text-slate-600 mb-6 leading-relaxed">
+                  <p className="text-slate-400 mb-6 leading-relaxed">
                     Led the development of a scalable microservices architecture, resulting in a 40% improvement in system performance.
                     Mentored junior developers and implemented best practices for code quality and testing. Collaborated with product
                     managers to define and prioritize features based on user feedback and business goals.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">Java</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">MySql</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">MongoDB</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">Data Structures and Algorithms</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">Artificial Intelligence</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">Prompt Engineering</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">SDLC</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">Java</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">MySql</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">MongoDB</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">Data Structures and Algorithms</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">Artificial Intelligence</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">Prompt Engineering</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">SDLC</span>
                   </div>
                 </div>
               </div>
               
               <div className="mb-12">
                 <div className="absolute -left-3 mt-1.5 h-6 w-6 rounded-full border-4 border-white bg-indigo-600"></div>
-                <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900">Software Developer</h3>
-                      <p className="text-indigo-600 font-medium">Genamplify Solutions.</p>
+                      <h3 className="text-xl font-bold text-white">Software Developer</h3>
+                      <p className="text-indigo-400 font-medium">Genamplify Solutions.</p>
                     </div>
                     <div className="mt-2 md:mt-0">
-                      <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
+                      <span className="bg-indigo-900 text-indigo-200 text-sm font-medium px-3 py-1 rounded-full">
                         Dec 2023 - Dec 2024
                       </span>
                     </div>
                   </div>
-                  <p className="text-slate-600 mb-6 leading-relaxed">
+                  <p className="text-slate-400 mb-6 leading-relaxed">
                     Developed and maintained multiple web applications using React and Node.js.
                     Collaborated with UX designers to implement responsive and accessible user interfaces.
                     Optimized application performance and reduced load times by 30% through code refactoring
                     and implementing efficient data fetching strategies.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">JavaScript</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">React</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">Express</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">MongoDB</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">Redux</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">JavaScript</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">React</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">Express</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">MongoDB</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">Redux</span>
                   </div>
                 </div>
               </div>
               
               <div>
                 <div className="absolute -left-3 mt-1.5 h-6 w-6 rounded-full border-4 border-white bg-indigo-600"></div>
-                <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="bg-slate-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900">Freelance Web Developer</h3>
-                      <p className="text-indigo-600 font-medium"></p>
+                      <h3 className="text-xl font-bold text-white">Freelance Web Developer</h3>
+                      <p className="text-indigo-400 font-medium"></p>
                     </div>
                     <div className="mt-2 md:mt-0">
-                      <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
+                      <span className="bg-indigo-900 text-indigo-200 text-sm font-medium px-3 py-1 rounded-full">
                         Apr 2021 - Present
                       </span>
                     </div>
                   </div>
-                  <p className="text-slate-600 mb-6 leading-relaxed">
+                  <p className="text-slate-400 mb-6 leading-relaxed">
                     Built responsive websites for clients across various industries.
                     Implemented front-end features using HTML, CSS, and JavaScript.
                     Worked closely with the design team to ensure pixel-perfect implementation
                     of designs and smooth user experiences across different devices and browsers.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">HTML/CSS</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">JavaScript</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">jQuery</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">PHP</span>
-                    <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm">WordPress</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">HTML/CSS</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">JavaScript</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">jQuery</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">PHP</span>
+                    <span className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm">WordPress</span>
                   </div>
                 </div>
               </div>
@@ -456,57 +488,57 @@ useEffect(() => {
       </section>
 
       {/* Education Section */}
-      <section id="education" className="py-16 md:py-24 bg-white">
+      <section id="education" className="py-16 md:py-24 bg-slate-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Education</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Education</h2>
             <div className="h-1 w-20 bg-indigo-600 mx-auto mb-6"></div>
-            <p className="text-slate-600 leading-relaxed">
+            <p className="text-slate-400 leading-relaxed">
               My academic background and qualifications.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="bg-slate-50 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div className="bg-slate-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
               <div className="bg-indigo-600 p-4">
                 <GraduationCap size={28} className="text-white" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Master of Computer Science</h3>
-                <p className="text-indigo-600 font-medium mb-2">Stanford University</p>
-                <p className="text-slate-600 mb-4">2014 - 2016</p>
-                <ul className="text-slate-600 space-y-2">
+                <h3 className="text-xl font-bold text-white mb-2">Master of Computer Science</h3>
+                <p className="text-indigo-400 font-medium mb-2">Stanford University</p>
+                <p className="text-slate-400 mb-4">2014 - 2016</p>
+                <ul className="text-slate-400 space-y-2">
                   <li className="flex items-start">
-                    <span className="text-indigo-600 mr-2">•</span>
+                    <span className="text-indigo-400 mr-2">•</span>
                     Specialized in Artificial Intelligence and Machine Learning
                   </li>
                   <li className="flex items-start">
-                    <span className="text-indigo-600 mr-2">•</span>
+                    <span className="text-indigo-400 mr-2">•</span>
                     Graduated with honors (GPA: 3.9/4.0)
                   </li>
                   <li className="flex items-start">
-                    <span className="text-indigo-600 mr-2">•</span>
+                    <span className="text-indigo-400 mr-2">•</span>
                     Research assistant in the Computer Vision Lab
                   </li>
                 </ul>
               </div>
             </div>
             
-            <div className="bg-slate-50 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div className="bg-slate-900 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
               <div className="bg-indigo-600 p-4">
                 <GraduationCap size={28} className="text-white" />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Bachelor of Engineering and Technology</h3>
-                <p className="text-indigo-600 font-medium mb-2">St. Ann's College of Engineering & Technology</p>
-                <p className="text-slate-600 mb-4">2018 - 2024</p>
-                <ul className="text-slate-600 space-y-2">
+                <h3 className="text-xl font-bold text-white mb-2">Bachelor of Engineering and Technology</h3>
+                <p className="text-indigo-400 font-medium mb-2">St. Ann's College of Engineering & Technology</p>
+                <p className="text-slate-400 mb-4">2018 - 2024</p>
+                <ul className="text-slate-400 space-y-2">
                   <li className="flex items-start">
-                    <span className="text-indigo-600 mr-2">•</span>
+                    <span className="text-indigo-400 mr-2">•</span>
                     Computer Science and Engineering
                   </li>
                   <li className="flex items-start">
-                    <span className="text-indigo-600 mr-2">•</span>
+                    <span className="text-indigo-400 mr-2">•</span>
                     Full Time
                   </li>
                   {/* <li className="flex items-start">
@@ -521,13 +553,13 @@ useEffect(() => {
       </section>
 
               {/* GitHub Contributions Section */}
-<section id="github" className="py-16 md:py-24 bg-white">
+<section id="github" className="py-16 md:py-24 bg-slate-900">
   <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
+    <h2 className="text-4xl font-extrabold text-white mb-4">
       GitHub Contributions
     </h2>
-    <div className="h-1 w-24 bg-indigo-600 mx-auto mb-6"></div> {/* Blue Line */}
-    <p className="text-lg text-gray-700 leading-relaxed mb-12">
+    <div className="h-1 w-24 bg-indigo-600 mx-auto mb-6"></div>
+    <p className="text-lg text-slate-300 leading-relaxed mb-12">
       A snapshot of my open-source contributions and coding activity.
     </p>
 
@@ -543,16 +575,16 @@ useEffect(() => {
     {/* GitHub Stats & Streaks */}
     <div className="flex flex-col md:flex-row justify-center items-center gap-12">
       <div>
-        <h3 className="text-2xl font-semibold text-gray-900 mb-4">GitHub Stats</h3>
+        <h3 className="text-2xl font-semibold text-white mb-4">GitHub Stats</h3>
         <img 
-          src="https://github-readme-stats.vercel.app/api?username=saikumar2304&show_icons=true&theme=default"
+          src="https://github-readme-stats.vercel.app/api?username=saikumar2304&show_icons=true&theme=dark"
           alt="GitHub Stats"
         />
       </div>
       <div>
-        <h3 className="text-2xl font-semibold text-gray-900 mb-4">GitHub Streak</h3>
+        <h3 className="text-2xl font-semibold text-white mb-4">GitHub Streak</h3>
         <img 
-          src="https://github-readme-streak-stats.herokuapp.com/?user=saikumar2304&theme=default"
+          src="https://github-readme-streak-stats.herokuapp.com/?user=saikumar2304&theme=dark"
           alt="GitHub Streak"
         />
       </div>
@@ -560,9 +592,9 @@ useEffect(() => {
 
     {/* Most Used Languages - Centered */}
     <div className="mt-12 flex flex-col items-center">
-      <h3 className="text-2xl font-semibold text-gray-900 mb-4">Most Used Languages</h3>
+      <h3 className="text-2xl font-semibold text-white mb-4">Most Used Languages</h3>
       <img 
-        src="https://github-readme-stats.vercel.app/api/top-langs/?username=saikumar2304&layout=compact&theme=default"
+        src="https://github-readme-stats.vercel.app/api/top-langs/?username=saikumar2304&layout=compact&theme=dark"
         alt="Top Languages"
       />
     </div>
@@ -578,14 +610,14 @@ useEffect(() => {
 </section>
 
       {/* Get in Touch Section */}
-<section id="contact" className="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-gray-100">
+<section id="contact" className="py-16 md:py-24 bg-gradient-to-b from-slate-900 to-slate-800">
   <div className="container mx-auto px-4 sm:px-6 lg:px-8">
     
     {/* Section Heading */}
     <div className="max-w-3xl mx-auto text-center mb-16">
-      <h2 className="text-4xl font-extrabold text-slate-900 mb-4">Let's Connect</h2>
+      <h2 className="text-4xl font-extrabold text-white mb-4">Let's Connect</h2>
       <div className="h-1 w-24 bg-indigo-600 mx-auto mb-6"></div>
-      <p className="text-lg text-slate-700 leading-relaxed">
+      <p className="text-lg text-slate-300 leading-relaxed">
         I'm always open to **new opportunities, collaborations, and discussions**.  
         Whether you have a question or just want to say hi, feel free to drop me a message! 🚀
       </p>
@@ -595,56 +627,56 @@ useEffect(() => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
       
       {/* Contact Information */}
-      <div className="bg-white p-8 rounded-lg shadow-lg border-l-4 border-indigo-600">
-        <h3 className="text-2xl font-semibold text-slate-900 mb-6 flex items-center">
+      <div className="bg-slate-800 p-8 rounded-lg shadow-lg border-l-4 border-indigo-600">
+        <h3 className="text-2xl font-semibold text-white mb-6 flex items-center">
           <Mail size={28} className="text-indigo-600 mr-3" /> Contact Info
         </h3>
         
         {/* Contact Items */}
         <div className="space-y-6">
           {/* Email */}
-          <div className="flex items-center bg-gray-100 p-4 rounded-lg shadow-sm">
+          <div className="flex items-center bg-slate-700 p-4 rounded-lg shadow-sm">
             <Mail size={20} className="text-indigo-600" />
             <div className="ml-4">
-              <p className="text-sm text-slate-500">Email</p>
-              <a href="mailto:saikumar2304@gmail.com" className="text-slate-800 font-medium hover:text-indigo-600 transition-colors duration-300">
+              <p className="text-sm text-slate-400">Email</p>
+              <a href="mailto:saikumar2304@gmail.com" className="text-white font-medium hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">
                 saikumar2304@gmail.com
               </a>
             </div>
           </div>
 
           {/* Phone */}
-          <div className="flex items-center bg-gray-100 p-4 rounded-lg shadow-sm">
+          <div className="flex items-center bg-slate-700 p-4 rounded-lg shadow-sm">
             <Phone size={20} className="text-indigo-600" />
             <div className="ml-4">
-              <p className="text-sm text-slate-500">Phone</p>
-              <a href="tel:+91XXXXXXXXXX" className="text-slate-800 font-medium hover:text-indigo-600 transition-colors duration-300">
+              <p className="text-sm text-slate-400">Phone</p>
+              <a href="tel:+91XXXXXXXXXX" className="text-white font-medium hover:text-indigo-400 dark:hover:text-indigo-400 transition-colors duration-300">
                 +91 XXXXXXXXXX
               </a>
             </div>
           </div>
 
           {/* Location */}
-          <div className="flex items-center bg-gray-100 p-4 rounded-lg shadow-sm">
+          <div className="flex items-center bg-slate-700 p-4 rounded-lg shadow-sm">
             <Briefcase size={20} className="text-indigo-600" />
             <div className="ml-4">
-              <p className="text-sm text-slate-500">Location</p>
-              <p className="text-slate-800 font-medium">Hyderabad, India</p>
+              <p className="text-sm text-slate-400">Location</p>
+              <p className="text-white font-medium">Hyderabad, India</p>
             </div>
           </div>
         </div>
 
         {/* Social Media Icons */}
         <div className="mt-8">
-          <h4 className="text-lg font-semibold text-slate-900 mb-4">Connect on Social Media</h4>
+          <h4 className="text-lg font-semibold text-white mb-4">Connect on Social Media</h4>
           <div className="flex space-x-4">
-            <a href="https://github.com/saikumar2304" className="bg-gray-200 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
+            <a href="https://github.com/saikumar2304" className="bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
               <Github size={22} />
             </a>
-            <a href="https://linkedin.com/in/saikumar2304" className="bg-gray-200 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
+            <a href="https://linkedin.com/in/saikumar2304" className="bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
               <Linkedin size={22} />
             </a>
-            <a href="#" className="bg-gray-200 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
+            <a href="#" className="bg-slate-700 p-3 rounded-full hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-md">
               <ExternalLink size={22} />
             </a>
           </div>
@@ -652,14 +684,14 @@ useEffect(() => {
       </div>
 
       {/* Contact Form */}
-      <div className="bg-white p-8 rounded-lg shadow-lg border-l-4 border-indigo-600">
-        <h3 className="text-2xl font-semibold text-slate-900 mb-6 flex items-center">
+      <div className="bg-slate-800 p-8 rounded-lg shadow-lg border-l-4 border-indigo-600">
+        <h3 className="text-2xl font-semibold text-white mb-6 flex items-center">
           <Mail size={28} className="text-indigo-600 mr-3" /> Send Me a Message
         </h3>
         
         <form onSubmit={handleSubmit} className="space-y-6">
   {showSuccess && (
-    <div className="flex items-center justify-center bg-green-100 text-green-700 p-4 rounded-md shadow-md">
+    <div className="flex items-center justify-center bg-green-900 text-green-300 p-4 rounded-md shadow-md">
       <CheckCircle size={24} className="mr-2" />
       <span>Message sent successfully! ✅</span>
     </div>
@@ -667,7 +699,7 @@ useEffect(() => {
 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div>
-      <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">Your Name</label>
+      <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">Your Name</label>
       <input
         type="text"
         id="name"
@@ -675,13 +707,13 @@ useEffect(() => {
         value={formData.name}
         onChange={handleChange}
         required
-        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+        className="w-full px-4 py-3 border border-slate-600 bg-slate-900 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
         placeholder="John Doe"
       />
     </div>
 
     <div>
-      <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">Your Email</label>
+      <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">Your Email</label>
       <input
         type="email"
         id="email"
@@ -689,21 +721,21 @@ useEffect(() => {
         value={formData.email}
         onChange={handleChange}
         required
-        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+        className="w-full px-4 py-3 border border-slate-600 bg-slate-900 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
         placeholder="john@example.com"
       />
     </div>
   </div>
 
   <div>
-    <label htmlFor="message" className="block text-sm font-medium text-slate-700 mb-2">Message</label>
+    <label htmlFor="message" className="block text-sm font-medium text-slate-300 mb-2">Message</label>
     <textarea
       id="message"
       name="message"
       value={formData.message}
       onChange={handleChange}
       required
-      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
+      className="w-full px-4 py-3 border border-slate-600 bg-slate-900 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300"
       placeholder="Your message here..."
       rows={5}
     ></textarea>
@@ -716,7 +748,7 @@ useEffect(() => {
     {status === "Sending..." ? "Sending..." : "Send Message"}
   </button>
 
-  {status && status !== "Sending..." && <p className="text-center text-slate-700 mt-4">{status}</p>}
+  {status && status !== "Sending..." && <p className="text-center text-slate-300 mt-4">{status}</p>}
 </form>
       </div>
 
@@ -727,14 +759,11 @@ useEffect(() => {
 
 
 
-<section id="coding-stats" className="py-16 md:py-24 bg-gray-100">
-  <div className="container mx-auto px-4">
-    {/* <h2 className="text-4xl font-extrabold text-center text-slate-900 mb-6">My Coding Journey</h2>
-    <div className="h-1 w-24 bg-indigo-600 mx-auto mb-12"></div> */}
-    <CodingStats />
-  </div>
+<section id="coding-stats" className="py-16 md:py-24 bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+    <div className="bg-transparent p-6">
+      <CodingStats />
+    </div>
 </section>
-
       
 
       {/* Footer */}
@@ -768,5 +797,4 @@ useEffect(() => {
     </div>
   );
 }
-
-export default App;
+export default App

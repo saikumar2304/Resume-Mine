@@ -75,8 +75,8 @@ const CodingStats: React.FC = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <h2 className="text-4xl font-extrabold text-center text-slate-900 mb-6">
+    <div className="container mx-auto px-4 py-16 text-white">
+      <h2 className="text-4xl font-extrabold text-center text-white mb-6">
         My Coding Stats
       </h2>
       <div className="h-1 w-24 bg-indigo-600 mx-auto mb-12"></div>
@@ -86,34 +86,34 @@ const CodingStats: React.FC = () => {
       ) : stats ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* LeetCode Stats */}
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg shadow-md text-center">
             <h3 className="text-2xl font-semibold text-indigo-600">LeetCode</h3>
-            <p className="text-slate-700 mt-2">Total Solved: {stats.leetcode.totalSolved}</p>
+            <p className="text-slate-300 mt-2">Total Solved: {stats.leetcode.totalSolved}</p>
             <p className="text-green-600">Easy: {stats.leetcode.easy}</p>
             <p className="text-yellow-600">Medium: {stats.leetcode.medium}</p>
             <p className="text-red-600">Hard: {stats.leetcode.hard}</p>
-            <p className="text-slate-500 mt-2">Ranking: #{stats.leetcode.ranking}</p>
+            <p className="text-slate-400 mt-2">Ranking: #{stats.leetcode.ranking}</p>
           </div>
 
           {/* HackerRank Stats */}
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg shadow-md text-center">
             <h3 className="text-2xl font-semibold text-green-600">HackerRank</h3>
-            <p className="text-slate-700 mt-2">Global Rank: {stats.hackerRank.rank}</p>
+            <p className="text-slate-300 mt-2">Global Rank: {stats.hackerRank.rank}</p>
             <p className="text-indigo-600">Badges: {stats.hackerRank.badges}</p>
-            <p className="text-slate-500 mt-2">Followers: {stats.hackerRank.followers}</p>
-            <p className="text-gray-500 text-sm mt-1">*Estimated (API not available)</p>
+            <p className="text-slate-400 mt-2">Followers: {stats.hackerRank.followers}</p>
+            <p className="text-slate-500 text-sm mt-1">*Estimated (API not available)</p>
           </div>
 
           {/* CodeWars Stats */}
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg shadow-md text-center">
             <h3 className="text-2xl font-semibold text-red-600">CodeWars</h3>
-            <p className="text-slate-700 mt-2">Honor: {stats.codeWars.honor}</p>
+            <p className="text-slate-300 mt-2">Honor: {stats.codeWars.honor}</p>
             <p className="text-indigo-600">Challenges Completed: {stats.codeWars.totalCompleted}</p>
-            <p className="text-slate-500 mt-2">Rank: {stats.codeWars.rank}</p>
+            <p className="text-slate-400 mt-2">Rank: {stats.codeWars.rank}</p>
           </div>
         </div>
       ) : (
-        <p className="text-center text-slate-700">Loading coding stats...</p>
+        <p className="text-center text-slate-300">Loading coding stats...</p>
       )}
     </div>
   );
